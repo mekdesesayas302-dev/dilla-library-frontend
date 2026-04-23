@@ -182,7 +182,7 @@ const News = () => {
                       onClick={() => navigate(`/news/${item.id}`)}
                       className="w-full bg-[#1d4e2f] hover:bg-[#153a23] text-white rounded-xl shadow-md transition-colors"
                     >
-                      Read Full Article →
+                      Read Detail News →
                     </Button>
                   </CardContent>
                 </Card>
