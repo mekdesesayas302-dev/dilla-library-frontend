@@ -18,15 +18,30 @@ import digitalLibHero from "@/assets/digital-library.jpg";
 import ebookImage from "@/assets/ebook.png";
 
 const Index = () => {
+  // 1. Image Array
+  const rawImages = [
+    mainGate,
+    adminBuilding,
+    dlImage,
+    campusLayout,
+    graduationImage,
+    mainGate2,
+    digitalLibHero
+  ];
+
+  // 2. Duplicate images for seamless loop
+  const marqueeImages = [...rawImages, ...rawImages];
+
+  // 3. Scroll to Top Logic
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [newsItems, setNewsItems] = useState([]);
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // PRODUCTION URL
+  // ✅ PRODUCTION API BASE
   const API_BASE = "https://dilla-library-backend.onrender.com";
 
-  // HELPER: Fix Image URLs from DB
+  // ✅ HELPER: Fix Image URLs from DB
   const getImageUrl = (url) => {
     if (!url) return digitalLibHero;
     if (url.includes("localhost:5000")) return url.replace("http://localhost:5000", API_BASE);
@@ -34,18 +49,20 @@ const Index = () => {
     return url;
   };
 
-  const rawImages = [mainGate, adminBuilding, dlImage, campusLayout, graduationImage, mainGate2, digitalLibHero];
-  const marqueeImages = [...rawImages, ...rawImages];
-
   useEffect(() => {
     const handleScroll = () => {
-      setShowScrollTop(window.scrollY > 300);
+      if (window.scrollY > 300) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
     };
+
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // FIXED FETCH LOGIC FOR NEWS & EVENTS
+  // ✅ FIXED FETCH LOGIC
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -57,6 +74,7 @@ const Index = () => {
         const nData = await nRes.json();
         const eData = await eRes.json();
 
+        // Ensure we always set an array even if the API fails or returns null
         setNewsItems(Array.isArray(nData) ? nData : []);
         setEvents(Array.isArray(eData) ? eData : []);
       } catch (err) {
@@ -69,18 +87,31 @@ const Index = () => {
   }, []);
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
   return (
     <div className="flex flex-col min-h-screen font-sans bg-gray-50 text-slate-900">
       <Navbar />
       
+      {/* CSS FOR MARQUEE ONLY */}
       <style>{`
-        @keyframes scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-        .animate-scroll { animation: scroll 60s linear infinite; }
-        .hero-section:hover .animate-scroll { animation-play-state: paused; }
-        .clip-curve { clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%); }
+        @keyframes scroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-scroll {
+          animation: scroll 60s linear infinite;
+        }
+        .hero-section:hover .animate-scroll {
+          animation-play-state: paused;
+        }
+        .clip-curve {
+          clip-path: polygon(0 0, 100% 0, 85% 100%, 0% 100%);
+        }
       `}</style>
       
       <main>
@@ -112,17 +143,13 @@ const Index = () => {
 
               <h1 className="text-white mb-6 leading-tight drop-shadow-2xl">
                 <span className="block text-4xl md:text-5xl font-bold tracking-tight mb-2 text-white drop-shadow-md">
-                
                 </span>
-               
               </h1>
               
               <p className="text-lg md:text-xl text-white mb-8 max-w-2xl mx-auto font-medium leading-relaxed drop-shadow-lg bg-black/20 backdrop-blur-[2px] p-2 rounded-lg">
                 "Empowering Knowledge, Enriching Minds, Advancing Excellence".
               </p>
               
-             
-
               <div className="flex flex-wrap gap-4 justify-center">
                 <Link to="/services">
                   <Button size="lg" className="bg-yellow-500 hover:bg-yellow-600 text-[#0f2918] font-bold border-none h-11 px-8 shadow-xl hover:shadow-2xl transition-all">
@@ -139,7 +166,7 @@ const Index = () => {
           </div>
         </section>
 
- {/* ABOUT LIBRARY SECTION - CURVED STYLE */}
+{/* ABOUT LIBRARY SECTION - CURVED STYLE */}
 <section className="py-24 bg-gray-50 overflow-hidden">
   <div className="container mx-auto px-4">
     <div className="relative bg-white rounded-[40px] shadow-2xl overflow-hidden flex flex-col lg:flex-row items-stretch min-h-[500px]">
@@ -184,7 +211,7 @@ const Index = () => {
   Today, the library provides both traditional and digital services, including institutional repositories and modern research tools.
 </p>
 
-         
+          
         </div>
       </div>
     </div>
@@ -202,7 +229,7 @@ const Index = () => {
 
       {/* AI Badge */}
       <div className="mb-5 inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold text-green-300 bg-green-900/40 rounded-full border border-green-500/30">
-         ★ DU Library
+          ★ DU Library
       </div>
 
       <h3 className="text-xl font-bold text-white mb-3 group-hover:text-yellow-400 transition">
@@ -211,7 +238,7 @@ const Index = () => {
 
       <p className="text-gray-300 text-large leading-relaxed">
        To become a nationally competitive and internationally recognized library by 2030 (E.C.), contributing to being a university of innovation and connectivity.
-	   
+	    
       </p>
 
       {/* Bottom line */}
@@ -260,7 +287,7 @@ const Index = () => {
 
       {/* Badge */}
       <div className="mb-5 inline-flex items-center gap-2 px-3 py-1 text-xs font-semibold text-yellow-300 bg-yellow-900/40 rounded-full border border-yellow-500/30">
-         ★  DU Library
+          ★  DU Library
       </div>
 
       <h3 className="text-xl font-bold text-white mb-4 group-hover:text-yellow-400 transition">
@@ -377,7 +404,7 @@ const Index = () => {
   </div>
 </section>
 
-     {/* NEWS & EVENTS SECTION - FINAL CLEAN VERSION */}
+      {/* NEWS & EVENTS SECTION - FIXED SECTION */}
 <section className="py-20 bg-gradient-to-b from-green-50 to-white">
   <div className="container mx-auto px-4">
 
@@ -432,7 +459,7 @@ const Index = () => {
               {/* IMAGE */}
               <div className="bg-green-50 p-4 flex items-center justify-center">
                 <img
-                  src={item.image || digitalLibHero}
+                  src={getImageUrl(item.image)}
                   alt={item.title}
                   className="w-full max-h-52 object-contain rounded-lg transition duration-300 group-hover:scale-105"
                 />
