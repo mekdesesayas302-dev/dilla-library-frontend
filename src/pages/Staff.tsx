@@ -4,6 +4,9 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Mail, Phone, MapPin, Users, Sparkles } from "lucide-react";
 
+/* ================= 1. LIVE API CONFIG ================= */
+const API_BASE_URL = "https://dilla-library-backend.onrender.com";
+
 /* IMAGES */
 import adminBuilding from "@/assets/dl1.jpg";
 import campusLayout from "@/assets/dl2.jpg";
@@ -29,29 +32,46 @@ const Staff = () => {
   const navigate = useNavigate();
   const [staffList, setStaffList] = useState([]);
   const [director, setDirector] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  /* ================= FETCH DATA ================= */
+  /* ================= 2. FETCH DATA (FIXED) ================= */
   useEffect(() => {
-    fetch("https://dilla-library-backend.onrender.com/api/staff")
-      .then(res => res.json())
-      .then(data => {
-        if (!Array.isArray(data)) return;
-        setStaffList(data);
-        const dir = data.find(
-          s => s.role?.toLowerCase() === "director" || s.name?.toLowerCase().includes("asnake")
-        ) || null;
-        setDirector(dir);
-      })
-      .catch(() => setStaffList([]));
+    const fetchStaff = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`${API_BASE_URL}/api/staff`);
+        
+        if (!res.ok) throw new Error("Failed to fetch staff data");
+        
+        const data = await res.json();
+        
+        if (Array.isArray(data)) {
+          setStaffList(data);
+          // Logic to find the Director (Asnake or designated role)
+          const dir = data.find(
+            s => s.position?.toLowerCase().includes("director") || 
+                 s.name?.toLowerCase().includes("asnake")
+          ) || null;
+          setDirector(dir);
+        }
+      } catch (err) {
+        console.error("❌ Staff Fetch Error:", err.message);
+        setStaffList([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchStaff();
   }, []);
 
-  const normalStaff = staffList.filter(s => s.role?.toLowerCase() !== "director");
+  const normalStaff = staffList.filter(s => s.id !== director?.id);
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
       <Navbar />
 
-      {/* ================= HERO (UPDATED: PREMIUM MARQUEE STYLE) ================= */}
+      {/* ================= HERO (MARQUEE) ================= */}
       <section className="relative min-h-[520px] flex items-center justify-center overflow-hidden bg-[#0f2918]">
         <style>{`
           @keyframes scroll {
@@ -63,7 +83,6 @@ const Staff = () => {
           }
         `}</style>
 
-        {/* BACKGROUND MARQUEE */}
         <div className="absolute inset-0 z-0">
           <div className="flex h-full w-max animate-scroll">
             {marqueeImages.map((img, i) => (
@@ -78,12 +97,9 @@ const Staff = () => {
           </div>
         </div>
 
-        {/* REFINED GRADIENT OVERLAY */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent z-10" />
 
-        {/* HERO CONTENT */}
         <div className="relative z-20 text-center px-4 max-w-4xl">
-          {/* Badge */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-white/90 border border-yellow-600 rounded-full mb-6 shadow-xl">
             <Users className="w-4 h-4 text-yellow-700" />
             <span className="text-yellow-700 text-xs font-black uppercase tracking-widest">
@@ -91,7 +107,7 @@ const Staff = () => {
             </span>
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">
+          <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 drop-shadow-lg">
             Library Staff
           </h1>
 
@@ -103,15 +119,13 @@ const Staff = () => {
           </div>
         </div>
 
-        {/* DECORATIVE CURVE */}
         <div className="absolute bottom-0 left-0 w-full h-14 bg-[#0f2918] rounded-t-[50px] z-20 hidden lg:block" />
       </section>
 
       {/* ================= DIRECTOR SECTION ================= */}
-      {director && (
+      {!loading && director && (
         <section className="relative py-24 bg-gradient-to-br from-[#0f2918] via-[#1d4e2f] to-[#0b1f14] text-white">
           <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 gap-14 items-center">
-            {/* DIRECTOR IMAGE */}
             <div className="flex justify-center">
               <div className="bg-white/5 p-4 rounded-[40px] shadow-2xl w-full max-w-md border border-white/10 relative group">
                 <div className="absolute -top-4 -right-4 bg-yellow-500 p-3 rounded-2xl shadow-lg z-30">
@@ -119,13 +133,13 @@ const Staff = () => {
                 </div>
                 <img
                   src={director.image || digitalLibHero}
-                  className="w-full h-[450px] object-cover rounded-[32px] group-hover:scale-[1.02] transition-transform duration-500"
+                  className="w-full h-[450px] object-cover rounded-[32px] transition-transform duration-500 group-hover:scale-105"
                   alt="Director"
+                  onError={(e) => { e.target.src = digitalLibHero; }}
                 />
               </div>
             </div>
 
-            {/* DIRECTOR CONTENT */}
             <div className="space-y-8">
               <div className="inline-block bg-yellow-500 text-[#1d4e2f] px-6 py-2 rounded-2xl text-sm font-black shadow-lg">
                 EXECUTIVE DIRECTOR
@@ -140,28 +154,18 @@ const Staff = () => {
               </p>
 
               <p className="text-white/90 leading-relaxed text-xl border-l-8 border-yellow-500 pl-6 italic font-medium">
-                "{director.bio ||
-                  "Leading academic excellence and digital transformation at Dilla University Library."}"
+                "{director.bio || "Leading academic excellence and digital transformation at Dilla University Library."}"
               </p>
 
               <div className="grid sm:grid-cols-2 gap-6 pt-4">
                 <div className="flex items-center gap-4 bg-white/10 p-5 rounded-2xl border border-white/5 hover:bg-white/20 transition-colors">
-                  <div className="bg-yellow-500/20 p-2 rounded-lg">
-                    <Mail className="text-yellow-400" size={20} />
-                  </div>
+                  <Mail className="text-yellow-400" size={20} />
                   <span className="text-sm font-semibold truncate">{director.email || "director@du.edu.et"}</span>
                 </div>
                 <div className="flex items-center gap-4 bg-white/10 p-5 rounded-2xl border border-white/5 hover:bg-white/20 transition-colors">
-                  <div className="bg-yellow-500/20 p-2 rounded-lg">
-                    <Phone className="text-yellow-400" size={20} />
-                  </div>
-                  <span className="text-sm font-semibold">{director.phone || "+251-XX-XXX-XXXX"}</span>
+                  <Phone className="text-yellow-400" size={20} />
+                  <span className="text-sm font-semibold">{director.phone || "Contact via Office"}</span>
                 </div>
-              </div>
-
-              <div className="flex items-center gap-3 text-white/70 font-semibold">
-                <MapPin size={20} className="text-yellow-500" />
-                Dilla University Library Administration, Main Campus
               </div>
             </div>
           </div>
@@ -178,10 +182,14 @@ const Staff = () => {
             <div className="w-24 h-2 bg-yellow-500 mx-auto rounded-full" />
           </div>
 
-          {staffList.length === 0 ? (
+          {loading ? (
             <div className="text-center py-20">
                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1d4e2f] mx-auto mb-4" />
-               <p className="text-gray-500 font-bold">Synchronizing staff records...</p>
+               <p className="text-gray-500 font-bold">Connecting to Staff Records...</p>
+            </div>
+          ) : staffList.length === 0 ? (
+            <div className="text-center py-20">
+              <p className="text-gray-400">No staff records found.</p>
             </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-10">
@@ -196,6 +204,7 @@ const Staff = () => {
                       src={item.image || digitalLibHero}
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                       alt={item.name}
+                      onError={(e) => { e.target.src = digitalLibHero; }}
                     />
                   </div>
 
