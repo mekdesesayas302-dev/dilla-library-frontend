@@ -4,8 +4,12 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, MapPin, Wifi } from "lucide-react"; // Added Wifi for the badge
+import { Calendar, Clock, MapPin, Wifi } from "lucide-react";
 import { Button } from "@/components/ui/button";
+
+/* ================= API CONFIG ================= */
+// This ensures it uses Render in production and localhost in development
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 /* ================= HERO IMAGES ================= */
 import adminBuilding from "@/assets/dl1.jpg";
@@ -34,15 +38,20 @@ const News = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // ✅ Updated to use dynamic API_BASE_URL
     Promise.all([
-      fetch("http://localhost:5000/api/news"),
-      fetch("http://localhost:5000/api/events")
+      fetch(`${API_BASE_URL}/api/news`),
+      fetch(`${API_BASE_URL}/api/events`)
     ])
       .then(async ([n, e]) => {
+        if (!n.ok || !e.ok) throw new Error("Server response failed");
         setNewsItems(await n.json());
         setEvents(await e.json());
       })
-      .catch(err => console.error(err));
+      .catch(err => {
+        console.error("❌ Fetch Error:", err);
+        // Optional: set a state to show an error message to the user
+      });
   }, []);
 
   const formatDate = (date) => {
@@ -58,9 +67,8 @@ const News = () => {
     <div className="bg-white min-h-screen">
       <Navbar />
 
-      {/* ================= HERO (UPDATED: NO OVERLAY) ================= */}
+      {/* ================= HERO ================= */}
       <section className="relative min-h-[500px] flex items-center justify-center overflow-hidden bg-[#0f2918]">
-
         <style>{`
           @keyframes scroll {
             0% { transform: translateX(0); }
@@ -71,7 +79,6 @@ const News = () => {
           }
         `}</style>
 
-        {/* MARQUEE LAYER */}
         <div className="absolute inset-0">
           <div className="flex h-full w-max animate-scroll">
             {marqueeImages.map((img, index) => (
@@ -86,13 +93,9 @@ const News = () => {
           </div>
         </div>
 
-        {/* REMOVED DARK OVERLAY - Added subtle darkening only at bottom for transition */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
 
-        {/* CONTENT */}
         <div className="relative z-10 text-center px-4 max-w-4xl">
-
-          {/* Badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/90 border border-yellow-600 rounded-full mb-6 shadow-lg">
             <Wifi className="w-3.5 h-3.5 text-yellow-700" />
             <span className="text-yellow-700 text-xs font-bold uppercase tracking-widest">
@@ -100,22 +103,18 @@ const News = () => {
             </span>
           </div>
 
-          {/* Heading with shadow for visibility on bright images */}
           <h1 className="text-4xl md:text-6xl font-extrabold text-white mb-6 drop-shadow-[0_4px_4px_rgba(0,0,0,0.8)]">
             Discover Library Updates
           </h1>
 
-          {/* Paragraph with glass background for readability */}
           <div className="max-w-2xl mx-auto bg-black/30 backdrop-blur-md p-4 rounded-2xl border border-white/10">
             <p className="text-white text-lg font-medium leading-relaxed">
               Stay informed with announcements, research updates, trainings,
               and academic events from Dilla University Library.
             </p>
           </div>
-
         </div>
 
-        {/* Transition curve to next section */}
         <div className="absolute bottom-0 left-0 w-full h-14 bg-white rounded-t-[50px]" />
       </section>
 
@@ -127,7 +126,9 @@ const News = () => {
           </h2>
 
           {newsItems.length === 0 ? (
-            <p className="text-center text-gray-500">No news available</p>
+            <div className="text-center py-10">
+               <p className="text-gray-500">Connecting to server or no news available...</p>
+            </div>
           ) : (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
               {newsItems.map(item => (
@@ -181,7 +182,7 @@ const News = () => {
           </h2>
 
           {events.length === 0 ? (
-            <p className="text-gray-500 text-center">No events available</p>
+            <p className="text-gray-500 text-center">No events scheduled currently.</p>
           ) : (
             <div className="grid md:grid-cols-3 gap-8">
               {events.map(event => (
