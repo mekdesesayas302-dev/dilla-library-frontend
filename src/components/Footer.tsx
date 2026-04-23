@@ -12,7 +12,7 @@ const Footer = () => {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // PRODUCTION API BASE
+  // ✅ PRODUCTION API BASE (Pointed to Render)
   const API_BASE = "https://dilla-library-backend.onrender.com";
 
   const handleSubscribe = async () => {
@@ -29,24 +29,32 @@ const Footer = () => {
     try {
       setLoading(true);
 
-      // 2. Updated Fetch to Production URL
+      // 2. Updated Fetch Logic with explicit headers
       const res = await fetch(`${API_BASE}/api/subscribe`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          "Accept": "application/json"
         },
         body: JSON.stringify({ email })
       });
 
-      const data = await res.json();
+      // Handle potential empty responses or non-JSON errors
+      const contentType = res.headers.get("content-type");
+      let data = {};
+      if (contentType && contentType.includes("application/json")) {
+        data = await res.json();
+      }
 
-      if (!res.ok) throw new Error(data.message || "Failed to subscribe");
+      if (!res.ok) {
+        throw new Error(data.message || "Failed to subscribe. Please try again.");
+      }
 
       // 3. Success Feedback
       toast({
         title: "Success!",
         description: "You have been added to our mailing list.",
-        variant: "default", // Green/Success style
+        variant: "default", 
       });
 
       setEmail("");
@@ -56,7 +64,7 @@ const Footer = () => {
       console.error("Subscription Error:", err);
       toast({
         title: "Subscription Failed",
-        description: "Our server is currently busy. Please try again later.",
+        description: err.message || "Our server is currently busy. Please try again later.",
         variant: "destructive"
       });
     } finally {
@@ -161,7 +169,7 @@ const Footer = () => {
         </div>
 
         {/* COPYRIGHT AREA */}
-        <div className="border-t border-white/5 mt-16 pt-8 flex flex-col md:row items-center justify-between gap-4">
+        <div className="border-t border-white/5 mt-16 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-xs text-gray-500 font-medium">
             © {new Date().getFullYear()} <span className="text-gray-300">Dilla University Library</span>. All rights reserved.
           </p>
