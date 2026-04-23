@@ -8,8 +8,7 @@ import { Calendar, Clock, MapPin, Wifi } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 /* ================= API CONFIG ================= */
-// This ensures it uses Render in production and localhost in development
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE_URL = "https://dilla-library-backend.onrender.com";
 
 /* ================= HERO IMAGES ================= */
 import adminBuilding from "@/assets/dl1.jpg";
