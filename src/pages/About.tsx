@@ -62,7 +62,7 @@ const About = () => {
             <div className="p-8 bg-yellow-50 rounded-2xl border-l-8 border-yellow-500">
               <h3 className="text-2xl font-bold text-yellow-700 mb-4 flex items-center gap-2"><Zap /> Our Mission</h3>
               <p className="text-slate-700 italic">
-                "To foster intellectual growth, academic success, and lifelong learning for the students and staff of the university." [cite: 10]
+                "To foster intellectual growth, academic success, and lifelong learning for the students and staff of the university."
               </p>
             </div>
           </div>
@@ -82,7 +82,7 @@ const About = () => {
                     Established in 1996 (1987 E.C.), the **Dilla University Library and Information Service** began with limited resources and has since grown into a vital pillar supporting the university's academic mission. 
                   </p>
                   <p>
-                    Operating under the Vice President for Academic Affairs, the library provides both traditional and technology-driven services, including digital library access and an institutional repository[cite: 7, 8].
+                    Operating under the Vice President for Academic Affairs, the library provides both traditional and technology-driven services, including digital library access and an institutional repository.
                   </p>
                 </div>
               </div>
