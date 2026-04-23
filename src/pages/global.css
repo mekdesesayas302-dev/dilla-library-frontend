@@ -1,0 +1,267 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =========================
+   🌐 GLOBAL DESIGN TOKENS (ADVANCED)
+========================= */
+:root {
+  --primary: #0ea5e9;
+  --primary-glow: rgba(14, 165, 233, 0.5);
+
+  --bg-dark: #020617;
+  --bg-soft: #0f172a;
+  --bg-glass: rgba(255, 255, 255, 0.06);
+
+  --text-main: #e2e8f0;
+  --text-muted: #94a3b8;
+
+  --border-soft: rgba(255, 255, 255, 0.08);
+}
+
+/* =========================
+   🌌 GLOBAL BACKGROUND (AI FEEL)
+========================= */
+body {
+  font-family: 'Inter', sans-serif;
+  background: radial-gradient(circle at 20% 20%, #0f172a, #020617 60%);
+  color: var(--text-main);
+  overflow-x: hidden;
+}
+
+/* subtle animated glow background */
+body::before {
+  content: "";
+  position: fixed;
+  width: 600px;
+  height: 600px;
+  background: var(--primary-glow);
+  filter: blur(120px);
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: -1;
+  opacity: 0.4;
+}
+
+/* =========================
+   🎬 KEYFRAMES
+========================= */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scrollX {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* 🔥 Animated Border Movement */
+@keyframes borderMove {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 200% 50%; }
+}
+
+/* 💡 Optional Pulse Effect */
+@keyframes borderPulse {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
+/* =========================
+   ✨ CUSTOM UTILITIES (AI UI)
+========================= */
+@layer utilities {
+
+  /* 🎯 Curves */
+  .clip-curve {
+    clip-path: ellipse(100% 100% at 0% 50%);
+    transition: all 0.6s ease;
+  }
+
+  .clip-curve:hover {
+    clip-path: ellipse(130% 130% at 0% 50%);
+  }
+
+  .clip-curve-right {
+    clip-path: ellipse(90% 100% at 100% 50%);
+    transition: all 0.6s ease;
+  }
+
+  .clip-curve-right:hover {
+    clip-path: ellipse(120% 130% at 100% 50%);
+  }
+
+  /* 🧊 GLASS */
+  .glass {
+    background: var(--bg-glass);
+    backdrop-filter: blur(14px);
+    border-radius: 18px;
+    border: 1px solid var(--border-soft);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  }
+
+  /* 💡 GLOW */
+  .glow {
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.2);
+    transition: all 0.3s ease;
+  }
+
+  .glow:hover {
+    box-shadow: 0 0 30px rgba(14, 165, 233, 0.7);
+  }
+
+  /* 🌈 GRADIENT TEXT */
+  .text-gradient {
+    background: linear-gradient(90deg, #22d3ee, #3b82f6, #6366f1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* 🚀 HOVER SCALE */
+  .hover-scale {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .hover-scale:hover {
+    transform: translateY(-4px) scale(1.05);
+  }
+
+  /* 🎬 ANIMATIONS */
+  .fade-in {
+    animation: fadeIn 0.9s ease both;
+  }
+
+  .animate-scroll {
+    animation: scrollX 45s linear infinite;
+  }
+
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      rgba(255,255,255,0.05) 25%,
+      rgba(255,255,255,0.15) 50%,
+      rgba(255,255,255,0.05) 75%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2.5s infinite;
+  }
+
+  /* =========================
+     🔥 AI ANIMATED BORDER (FINAL)
+  ========================= */
+  .animate-border {
+    position: relative;
+    border-radius: 18px;
+    overflow: hidden;
+  }
+
+  .animate-border::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+
+    background: linear-gradient(
+      120deg,
+      #22d3ee,
+      #3b82f6,
+      #6366f1,
+      #22d3ee
+    );
+
+    background-size: 200% 200%;
+    animation: borderMove 6s linear infinite, borderPulse 3s ease-in-out infinite;
+
+    border-radius: inherit;
+
+    /* mask for border effect */
+    -webkit-mask: 
+      linear-gradient(#000 0 0) content-box, 
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+  }
+}
+
+/* =========================
+   🔄 RESET
+========================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  scroll-behavior: smooth;
+}
+
+/* =========================
+   📦 CONTAINER
+========================= */
+.container {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+/* =========================
+   🖼️ IMAGES
+========================= */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 14px;
+  transition: transform 0.5s ease, filter 0.5s ease;
+}
+
+img:hover {
+  transform: scale(1.05);
+  filter: brightness(1.05);
+}
+
+/* =========================
+   🔤 TYPOGRAPHY
+========================= */
+h1, h2, h3 {
+  line-height: 1.2;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+p {
+  line-height: 1.7;
+  color: var(--text-muted);
+}
+
+/* =========================
+   📱 RESPONSIVE
+========================= */
+@media (min-width: 1440px) {
+  .container {
+    max-width: 1400px;
+  }
+}
+
+@media (max-width: 768px) {
+  .clip-curve,
+  .clip-curve-right {
+    clip-path: none;
+  }
+
+  .animate-scroll {
+    animation-duration: 70s;
+  }
+}

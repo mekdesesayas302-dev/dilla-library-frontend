@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<title>Dilla University Library</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --primary: #00ffae;
+  --dark: #020617;
+}
+
+/* ===== LOADER ===== */
+#loader {
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(135deg, #0f2a44, var(--dark));
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  font-family: 'Inter', sans-serif;
+  color: white;
+  z-index: 9999;
+}
+
+/* SIMPLE BOOK ICON */
+.book {
+  width: 50px;
+  height: 65px;
+  background: linear-gradient(135deg, var(--primary), #0ea5e9);
+  border-radius: 4px;
+  margin-bottom: 20px;
+  animation: bounce 1.2s infinite;
+}
+
+@keyframes bounce {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* TITLE */
+.brand {
+  font-size: 20px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.brand span {
+  color: var(--primary);
+}
+
+/* LOADING TEXT */
+.loading-text {
+  font-size: 12px;
+  letter-spacing: 2px;
+  margin-bottom: 15px;
+  opacity: 0.8;
+}
+
+/* PROGRESS BAR */
+.progress {
+  width: 200px;
+  height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: var(--primary);
+  animation: load 3s linear forwards;
+}
+
+@keyframes load {
+  to { width: 100%; }
+}
+
+/* FADE OUT */
+.fade-out {
+  opacity: 0;
+  transition: opacity 0.6s ease;
+  pointer-events: none;
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="book"></div>
+
+  <div class="brand">
+    Dilla University <br>
+    <span>Library and Information Service</span>
+  </div>
+
+  <div class="loading-text">Loading resources...</div>
+
+  <div class="progress">
+    <div class="progress-bar"></div>
+  </div>
+</div>
+
+<!-- APP ROOT -->
+<div id="root"></div>
+
+<script type="module" src="/src/main.tsx"></script>
+
+<script>
+window.addEventListener("load", () => {
+  const loader = document.getElementById("loader");
+
+  setTimeout(() => {
+    loader.classList.add("fade-out");
+
+    setTimeout(() => {
+      loader.remove();
+    }, 600);
+
+  }, 3000);
+});
+</script>
+
+</body>
+</html>
