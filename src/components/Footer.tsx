@@ -9,18 +9,15 @@ import logo from "@/assets/logo.png";
 
 const Footer = () => {
   const { toast } = useToast();
+
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // ✅ PRODUCTION API BASE (Pointed to Render)
-  const API_BASE = "https://dilla-library-backend.onrender.com";
-
   const handleSubscribe = async () => {
-    // 1. Validation
-    if (!email || !email.includes("@")) {
+    if (!email) {
       toast({
-        title: "Invalid Email",
-        description: "Please enter a valid email address.",
+        title: "Error",
+        description: "Please enter your email",
         variant: "destructive"
       });
       return;
@@ -29,42 +26,29 @@ const Footer = () => {
     try {
       setLoading(true);
 
-      // 2. Updated Fetch Logic with explicit headers
-      const res = await fetch(`${API_BASE}/api/subscribe`, {
+      const res = await fetch("http://localhost:5000/api/subscribe", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json"
+          "Content-Type": "application/json"
         },
         body: JSON.stringify({ email })
       });
 
-      // Handle potential empty responses or non-JSON errors
-      const contentType = res.headers.get("content-type");
-      let data = {};
-      if (contentType && contentType.includes("application/json")) {
-        data = await res.json();
-      }
+      const data = await res.json();
 
-      if (!res.ok) {
-        throw new Error(data.message || "Failed to subscribe. Please try again.");
-      }
+      if (!res.ok) throw new Error(data.message);
 
-      // 3. Success Feedback
       toast({
-        title: "Success!",
-        description: "You have been added to our mailing list.",
-        variant: "default", 
+        title: "Subscribed!",
+        description: "You will receive updates from our library"
       });
 
       setEmail("");
 
     } catch (err) {
-      // 4. Detailed Error Catching
-      console.error("Subscription Error:", err);
       toast({
-        title: "Subscription Failed",
-        description: err.message || "Our server is currently busy. Please try again later.",
+        title: "Error",
+        description: err.message || "Subscription failed",
         variant: "destructive"
       });
     } finally {
@@ -74,109 +58,113 @@ const Footer = () => {
 
   return (
     <footer className="bg-[#0b1f13] text-white mt-auto relative overflow-hidden">
-      
-      {/* Visual Enhancements: Background Glows */}
-      <div className="absolute w-[400px] h-[400px] bg-yellow-500/10 blur-[120px] rounded-full top-[-100px] left-[-100px] pointer-events-none" />
-      <div className="absolute w-[300px] h-[300px] bg-green-400/10 blur-[100px] rounded-full bottom-[-100px] right-[-100px] pointer-events-none" />
+
+      {/* Background Glow */}
+      <div className="absolute w-[400px] h-[400px] bg-yellow-500/10 blur-[120px] rounded-full top-[-100px] left-[-100px]" />
+      <div className="absolute w-[300px] h-[300px] bg-green-400/10 blur-[100px] rounded-full bottom-[-100px] right-[-100px]" />
 
       <div className="relative container mx-auto px-6 py-16 z-10">
-        
-        {/* FOOTER CONTENT GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
 
-          {/* COLUMN 1: BRANDING */}
-          <div className="space-y-6">
-            <div className="flex items-center gap-3">
-              <img src={logo} alt="Dilla University Logo" className="h-14 w-14 object-contain" />
+        {/* GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
+
+          {/* BRAND */}
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <img src={logo} alt="Dilla University Logo" className="h-12 w-12" />
               <div>
-                <h2 className="font-black text-xl tracking-tight">Dilla University</h2>
-                <p className="text-xs text-yellow-500 font-bold uppercase tracking-widest">Library Services</p>
+                <h2 className="font-bold text-lg">Dilla University</h2>
+                <p className="text-xs text-gray-400">Library Services</p>
               </div>
             </div>
 
-            <p className="text-sm text-gray-400 leading-relaxed max-w-xs">
-              Empowering research, learning, and innovation through modern 
-              digital systems and dedicated academic support for our community.
+            <p className="text-sm text-gray-300 leading-relaxed">
+              Empowering research, learning, and innovation through modern
+              digital library systems and academic support.
             </p>
 
-            <div className="flex gap-4">
-              <a href="https://www.facebook.com/du.edu.et" target="_blank" rel="noreferrer" className="p-2.5 bg-white/5 rounded-xl hover:bg-yellow-500 hover:text-black transition-all">
-                <Facebook size={18} />
+            {/* SOCIAL LINKS */}
+            <div className="flex gap-3 mt-4">
+
+              <a href="https://www.facebook.com/du.edu.et" className="p-2 bg-white/10 rounded-full hover:bg-yellow-500 hover:text-black transition">
+                <Facebook size={16} />
               </a>
-              <a href="https://www.linkedin.com/company/dilla-university/" target="_blank" rel="noreferrer" className="p-2.5 bg-white/5 rounded-xl hover:bg-yellow-500 hover:text-black transition-all">
-                <Linkedin size={18} />
+
+       
+
+              {/* ✅ LINKEDIN FIXED */}
+              <a
+                href="https://www.linkedin.com/company/dilla-university/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-2 bg-white/10 rounded-full hover:bg-yellow-500 hover:text-black transition"
+              >
+                <Linkedin size={16} />
               </a>
+
             </div>
           </div>
 
-          {/* COLUMN 2: LINKS */}
-          <div className="md:pl-10">
-            <h3 className="text-white font-black text-lg mb-6 border-b border-yellow-500/30 pb-2 inline-block">Explore</h3>
-            <ul className="space-y-4 text-sm font-medium text-gray-400">
-              <li><Link to="/about" className="hover:text-yellow-400 transition-colors flex items-center gap-2">About the Library</Link></li>
-              <li><Link to="/services" className="hover:text-yellow-400 transition-colors flex items-center gap-2">Our Services</Link></li>
-              <li><Link to="/staff" className="hover:text-yellow-400 transition-colors flex items-center gap-2">Our Staff</Link></li>
-              <li><Link to="/news" className="hover:text-yellow-400 transition-colors flex items-center gap-2">Latest News</Link></li>
+          {/* QUICK LINKS */}
+          <div>
+            <h3 className="text-yellow-400 font-semibold mb-4">Quick Links</h3>
+            <ul className="space-y-2 text-sm">
+              <li><Link to="/about" className="hover:text-yellow-400">About</Link></li>
+              <li><Link to="/services" className="hover:text-yellow-400">Services</Link></li>
+              <li><Link to="/catalog" className="hover:text-yellow-400">Catalog</Link></li>
+              <li><Link to="/news" className="hover:text-yellow-400">News</Link></li>
             </ul>
           </div>
 
-          {/* COLUMN 3: CONTACT INFO */}
+          {/* CONTACT */}
           <div>
-            <h3 className="text-white font-black text-lg mb-6 border-b border-yellow-500/30 pb-2 inline-block">Get In Touch</h3>
-            <div className="space-y-5 text-sm text-gray-400">
-              <div className="flex gap-3">
-                <MapPin size={18} className="text-yellow-500 shrink-0" />
-                <p>Main Campus, Dilla University<br/>Dilla, Ethiopia</p>
-              </div>
-              <div className="flex gap-3">
-                <Phone size={18} className="text-yellow-500 shrink-0" />
-                <p>+251 463 312 029</p>
-              </div>
-              <div className="flex gap-3">
-                <Mail size={18} className="text-yellow-500 shrink-0" />
-                <p>library@du.edu.et</p>
-              </div>
+            <h3 className="text-yellow-400 font-semibold mb-4">Contact</h3>
+
+            <div className="space-y-3 text-sm text-gray-300">
+              <p className="flex gap-2 items-center">
+                <MapPin size={16} /> Dilla University, Ethiopia
+              </p>
+              <p className="flex gap-2 items-center">
+                <Phone size={16} /> +251463312029
+              </p>
+              <p className="flex gap-2 items-center">
+                <Mail size={16} /> library@du.edu.et
+              </p>
             </div>
           </div>
 
-          {/* COLUMN 4: NEWSLETTER */}
+          {/* NEWSLETTER */}
           <div>
-            <h3 className="text-white font-black text-lg mb-6 border-b border-yellow-500/30 pb-2 inline-block">Newsletter</h3>
-            <p className="text-sm text-gray-400 mb-6">
-              Subscribe to receive the latest academic resources and event updates.
+            <h3 className="text-yellow-400 font-semibold mb-4">Newsletter</h3>
+
+            <p className="text-sm text-gray-300 mb-3">
+              Subscribe to get latest updates, news, and library events.
             </p>
 
-            <div className="flex flex-col gap-3">
-              <div className="flex bg-white/5 p-1 rounded-xl border border-white/10 focus-within:border-yellow-500/50 transition-all">
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Your Email"
-                  className="bg-transparent w-full px-4 py-2 text-sm text-white outline-none"
-                />
-                <button
-                  onClick={handleSubscribe}
-                  disabled={loading}
-                  className="bg-yellow-500 p-2.5 rounded-lg text-black hover:bg-yellow-600 active:scale-95 transition-all disabled:opacity-50"
-                >
-                  <Send size={18} />
-                </button>
-              </div>
-              {loading && <p className="text-[10px] text-yellow-500 animate-pulse font-bold uppercase">Processing subscription...</p>}
+            <div className="flex">
+              <input
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter your email"
+                className="w-full px-3 py-2 rounded-l-md text-black outline-none"
+              />
+
+              <button
+                onClick={handleSubscribe}
+                disabled={loading}
+                className="bg-yellow-500 px-4 rounded-r-md text-black hover:bg-yellow-600 flex items-center gap-1"
+              >
+                <Send size={16} />
+                {loading ? "..." : "Join"}
+              </button>
             </div>
           </div>
         </div>
 
-        {/* COPYRIGHT AREA */}
-        <div className="border-t border-white/5 mt-16 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-gray-500 font-medium">
-            © {new Date().getFullYear()} <span className="text-gray-300">Dilla University Library</span>. All rights reserved.
-          </p>
-          <div className="flex items-center gap-6 text-[11px] text-gray-500 font-bold uppercase tracking-widest">
-            <span className="hover:text-yellow-500 cursor-default transition-colors">Privacy Policy</span>
-            <span className="hover:text-yellow-500 cursor-default transition-colors">Terms of Service</span>
-          </div>
+        {/* BOTTOM */}
+        <div className="border-t border-white/10 mt-12 pt-6 flex flex-col md:flex-row justify-between text-sm text-gray-400">
+          <p>© {new Date().getFullYear()} Dilla University Library</p>
+          <p>Developed by Library ICT Team</p>
         </div>
 
       </div>
