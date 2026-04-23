@@ -51,8 +51,8 @@ const [loading, setLoading] = useState(true);
   }, []);
 useEffect(() => {
   Promise.all([
-    fetch("http://localhost:5000/api/news"),
-    fetch("http://localhost:5000/api/events")
+    fetch("https://dilla-library-backend.onrender.com/api/news"),
+    fetch("https://dilla-library-backend.onrender.com/api/events")
   ])
     .then(async ([n, e]) => {
       setNewsItems(await n.json());
