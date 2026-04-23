@@ -35,7 +35,7 @@ const NewsDetails = () => {
 
     const fetchNews = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/news", {
+        const res = await fetch("https://dilla-library-backend.onrender.com/api/news", {
           signal: controller.signal,
         });
 
