@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Mail, Phone, Building2, UserCheck } from "lucide-react";
+import { Mail, Phone, Building2 } from "lucide-react";
 
 // Asset imports
 import adminBuilding from "@/assets/dl1.jpg";
@@ -55,14 +55,22 @@ const StaffDetails = () => {
 
   // --- HELPERS ---
   const normalize = (val) => (val || "").toLowerCase();
-  const formatInfo = (val) => val && val !== "" ? val : "Information not provided";
-  
-  // Fixes image paths if they were saved with 'localhost' in the database
-  const getImageUrl = (url) => {
-    if (!url) return digitalLibHero;
-    if (url.includes("localhost:5000")) {
-      return url.replace("http://localhost:5000", API_BASE);
+  const formatInfo = (val) => (val && val !== "" ? val : "Information not provided");
+
+  /**
+   * getImageUrl
+   * Handles Cloudinary URLs, local fallbacks, and automatic optimization.
+   */
+  const getImageUrl = (url, isThumbnail = false) => {
+    if (!url || url === "" || url.includes("localhost")) {
+      return digitalLibHero; // Fallback for missing or broken local links
     }
+
+    // Optimization: If it's a Cloudinary URL, we can request a smaller size for thumbnails
+    if (url.includes("res.cloudinary.com") && isThumbnail) {
+      return url.replace("/upload/", "/upload/w_500,c_limit,q_auto,f_auto/");
+    }
+
     return url;
   };
 
@@ -82,7 +90,7 @@ const StaffDetails = () => {
       <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 px-4">
         <h2 className="text-3xl font-black text-gray-800 mb-4">Profile Not Found</h2>
         <p className="text-gray-500 mb-8 text-center">The staff member you are looking for does not exist or has been moved.</p>
-        <button 
+        <button
           onClick={() => navigate("/staff")}
           className="bg-[#1d4e2f] text-white px-8 py-3 rounded-full font-bold hover:bg-green-900 transition-all shadow-lg"
         >
@@ -92,14 +100,10 @@ const StaffDetails = () => {
     );
   }
 
-  /* LOGIC FIX: 
-     1. Uses 'position' (TiDB column) instead of 'role'.
-     2. Uses Number() to ensure IDs match even if one is a string.
-  */
-  const director = allStaff.find(s => normalize(s.position).includes("director")) || null;
-  const team = allStaff.filter(s => 
-    Number(s.id) !== Number(staff.id) && 
-    Number(s.id) !== Number(director?.id)
+  // LOGIC: Filter team members, excluding the current staff and the director
+  const director = allStaff.find((s) => normalize(s.position).includes("director")) || null;
+  const team = allStaff.filter(
+    (s) => Number(s.id) !== Number(staff.id) && Number(s.id) !== Number(director?.id)
   );
 
   return (
@@ -134,9 +138,10 @@ const StaffDetails = () => {
             <div className="md:col-span-5 bg-slate-50 p-8 flex items-center justify-center">
               <div className="relative group">
                 <div className="absolute -inset-1 bg-gradient-to-r from-yellow-400 to-green-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
-                <img 
-                  src={getImageUrl(staff.image)} 
+                <img
+                  src={getImageUrl(staff.image)}
                   alt={staff.name}
+                  onError={(e) => { e.target.src = digitalLibHero; }} // Prevents broken icons
                   className="relative h-[450px] w-full object-contain rounded-2xl bg-white p-2 shadow-xl"
                 />
               </div>
@@ -167,7 +172,7 @@ const StaffDetails = () => {
                     <Mail className="text-[#1d4e2f]" size={20} />
                     <div>
                       <p className="text-[10px] text-gray-400 font-bold uppercase">Email</p>
-                      <p className="text-sm font-bold text-gray-700">{formatInfo(staff.email)}</p>
+                      <p className="text-sm font-bold text-gray-700 truncate max-w-[180px]">{formatInfo(staff.email)}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl">
@@ -202,16 +207,17 @@ const StaffDetails = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {team.map((member) => (
-              <div 
+              <div
                 key={member.id}
                 onClick={() => navigate(`/staff/${member.id}`)}
                 className="group cursor-pointer bg-white border border-gray-100 rounded-[32px] p-6 hover:shadow-2xl transition-all duration-500"
               >
                 <div className="h-64 bg-slate-50 rounded-2xl mb-6 overflow-hidden">
-                  <img 
-                    src={getImageUrl(member.image)} 
-                    className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-700" 
-                    alt={member.name} 
+                  <img
+                    src={getImageUrl(member.image, true)} // Uses optimized thumbnail
+                    onError={(e) => { e.target.src = digitalLibHero; }}
+                    className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-700"
+                    alt={member.name}
                   />
                 </div>
                 <h4 className="text-xl font-black text-[#1d4e2f] group-hover:text-green-700 transition-colors">
