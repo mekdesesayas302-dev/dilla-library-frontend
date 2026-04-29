@@ -1,9 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { 
-  Menu, X, Search, Clock, User, Globe, 
-  ChevronDown, Users, FileText, MapPin 
-} from "lucide-react";
+import { Menu, X, Search, Clock, User, Globe, ChevronDown, Users, FileText, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
@@ -22,23 +19,26 @@ const Navbar = () => {
   const location = useLocation();
 
   useEffect(() => {
+    // --- ETHIOPIAN HOLIDAY & 24/7 LOGIC ---
     const checkStatus = () => {
       const now = new Date();
-      const month = now.getMonth() + 1; // Months are 0-indexed
+      const month = now.getMonth() + 1; // 1-12
       const date = now.getDate();
-      const todayKey = `${month}-${date}`; // Format: "MM-DD"
+      const todayKey = `${month}-${date}`;
 
-      // --- HOLIDAY CALENDAR ---
-      // Add specific dates here when the library should be closed
+      // List of dates where the library is CLOSED (Gregorian Mapping)
       const holidays = [
-        "1-1",   // New Year's Day
-        "1-7",   // Ganna / Genna
-        "1-19",  // Timkat
-        "3-2",   // Victory at Adwa
-        "5-1",   // International Labour Day
-        "5-5",   // Patriots' Victory Day
         "9-11",  // Enkutatash (Ethiopian New Year)
+        "9-12",  // New Year (Leap Year support)
         "9-27",  // Meskel
+        "1-7",   // Ganna (Christmas)
+        "1-19",  // Timkat (Epiphany)
+        "3-2",   // Adwa Victory Day
+        "4-17",  // Siklet (Good Friday - 2026)
+        "4-19",  // Fasika (Easter - 2026)
+        "5-1",   // Labour Day
+        "5-5",   // Patriots' Victory Day
+        "5-28",  // Derg Downfall Day
       ];
 
       const isHoliday = holidays.includes(todayKey);
@@ -57,15 +57,17 @@ const Navbar = () => {
     };
 
     checkStatus();
-    // Check once an hour to see if a holiday has started
-    const interval = setInterval(checkStatus, 3600000);
+    // Check every hour for date transition
+    const statusInterval = setInterval(checkStatus, 3600000);
 
-    const handleScroll = () => setScrolled(window.scrollY > 20);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+    };
     window.addEventListener("scroll", handleScroll);
-    
+
     return () => {
       window.removeEventListener("scroll", handleScroll);
-      clearInterval(interval);
+      clearInterval(statusInterval);
     };
   }, []);
 
@@ -73,7 +75,7 @@ const Navbar = () => {
     setMobileMenuOpen(false);
   }, [location]);
 
-  // Navigation config...
+  // Main Navigation Links
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Services", path: "/services" },
@@ -83,6 +85,7 @@ const Navbar = () => {
     { name: "Contact", path: "/contact" },
   ];
 
+  // Mobile Menu Items
   const mobileLinks = [
     "Home", "About", "Staff Directory", "Library Policies", "Library Branches",
     "Services", "E-Library", "OPAC", "News & Events", "Contact"
@@ -95,18 +98,16 @@ const Navbar = () => {
       <div className="hidden md:flex justify-between items-center bg-green-900 text-white px-4 py-1.5 text-xs font-medium tracking-wide">
         <div className="container mx-auto flex justify-between">
           <div className="flex items-center space-x-6">
-            <div className="flex items-center gap-2">
+            <span className="flex items-center gap-1.5 opacity-95">
               <Clock className="w-3.5 h-3.5 text-yellow-400" />
-              <span className="flex items-center gap-1.5">
-                <span className={`inline-block w-2 h-2 rounded-full ${libraryStatus.isOpen ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]' : 'bg-red-500'}`}></span>
-                <span className="font-bold uppercase tracking-tight">
-                  {libraryStatus.isOpen ? "Always Open" : "Library Closed"}
+              <div className="flex items-center gap-2">
+                <span className={`inline-block w-2 h-2 rounded-full ${libraryStatus.isOpen ? 'bg-emerald-400 animate-pulse' : 'bg-red-500'}`}></span>
+                <span className="font-bold uppercase tracking-tighter">
+                  {libraryStatus.isOpen ? "Always Open" : "Closed"}
                 </span>
-                <span className="opacity-75 ml-1 border-l border-white/20 pl-2">
-                  {libraryStatus.text}
-                </span>
-              </span>
-            </div>
+                <span className="opacity-80 ml-1 border-l border-white/20 pl-2">{libraryStatus.text}</span>
+              </div>
+            </span>
             <a href="https://www.du.edu.et/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 opacity-90 hover:text-yellow-400 transition-colors">
               <Globe className="w-3.5 h-3.5 text-blue-300" />
               <span>Dilla University Main Site</span>
@@ -161,7 +162,28 @@ const Navbar = () => {
                             </Link>
                           </NavigationMenuLink>
                         </li>
-                        {/* Other sublinks here... */}
+                        <li>
+                          <NavigationMenuLink asChild>
+                            <Link to="/policies" className="flex items-center gap-3 rounded-md p-3 transition-colors hover:bg-slate-50 hover:text-green-700">
+                              <FileText className="w-4 h-4 text-slate-500" />
+                              <div>
+                                <div className="text-sm font-bold text-slate-800">Library Policies</div>
+                                <p className="text-xs text-slate-500">Rules & Regulations</p>
+                              </div>
+                            </Link>
+                          </NavigationMenuLink>
+                        </li>
+                        <li>
+                          <NavigationMenuLink asChild>
+                            <Link to="/branches" className="flex items-center gap-3 rounded-md p-3 transition-colors hover:bg-slate-50 hover:text-green-700">
+                              <MapPin className="w-4 h-4 text-slate-500" />
+                              <div>
+                                <div className="text-sm font-bold text-slate-800">Library Branches</div>
+                                <p className="text-xs text-slate-500">Locations & Capacity</p>
+                              </div>
+                            </Link>
+                          </NavigationMenuLink>
+                        </li>
                       </ul>
                     </NavigationMenuContent>
                   </NavigationMenuItem>
@@ -185,9 +207,29 @@ const Navbar = () => {
               </Link>
             </div>
 
+            {/* MOBILE MENU TRIGGER */}
             <button className="lg:hidden p-2 text-slate-600" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               {mobileMenuOpen ? <X className="h-7 w-7" /> : <Menu className="h-7 w-7" />}
             </button>
+          </div>
+        </div>
+
+        {/* MOBILE MENU */}
+        <div className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${mobileMenuOpen ? "max-h-[800px] border-t border-slate-100 shadow-xl" : "max-h-0"} bg-white`}>
+          <div className="container mx-auto px-4 py-6 flex flex-col space-y-3">
+            <Link to="/catalog" className="w-full">
+              <Button className="w-full bg-green-700 text-white mb-4"><Search className="mr-2 h-4 w-4" /> Search Catalog</Button>
+            </Link>
+            {mobileLinks.map((item) => (
+              <Link 
+                key={item} 
+                to={item === "Home" ? "/" : item === "Staff Directory" ? "/staff" : item === "Library Policies" ? "/policies" : item === "Library Branches" ? "/branches" : `/${item.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-')}`}
+                className="flex items-center justify-between px-4 py-3 rounded-xl text-slate-700 font-medium hover:bg-slate-50 hover:text-green-700 transition-all border border-transparent hover:border-slate-100"
+              >
+                {item}
+                <ChevronDown className="h-4 w-4 -rotate-90 opacity-30" />
+              </Link>
+            ))}
           </div>
         </div>
       </nav>
