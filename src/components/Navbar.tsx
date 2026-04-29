@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Search, Clock, User, Globe, ChevronDown, BookOpen, MapPin, Users, FileText } from "lucide-react";
+import { Menu, X, Search, Clock, User, Globe, ChevronDown, Users, FileText, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
@@ -15,9 +15,31 @@ import logo from "@/assets/logo.png";
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [displayHours, setDisplayHours] = useState(""); // Dynamic hours state
   const location = useLocation();
 
   useEffect(() => {
+    // Function to get current day and formatted hours
+    const updateHours = () => {
+      const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const now = new Date();
+      const dayName = days[now.getDay()];
+      
+      // Example Logic: Mon-Fri (8-10), Sat (9-6), Sun (Closed or 1-5)
+      // Adjust these strings to match your library's actual schedule
+      let hours = "8:00 AM - 10:00 PM"; 
+      
+      if (dayName === "Saturday") {
+        hours = "9:00 AM - 6:00 PM";
+      } else if (dayName === "Sunday") {
+        hours = "1:00 PM - 5:00 PM";
+      }
+
+      setDisplayHours(`${dayName}: ${hours}`);
+    };
+
+    updateHours();
+    
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
     };
@@ -29,7 +51,6 @@ const Navbar = () => {
     setMobileMenuOpen(false);
   }, [location]);
 
-  // Main Navigation Links (Top Level)
   const navLinks = [
     { name: "Home", path: "/" },
     { name: "Services", path: "/services" },
@@ -39,18 +60,9 @@ const Navbar = () => {
     { name: "Contact", path: "/contact" },
   ];
 
-  // Mobile Menu Items (Includes sub-pages for easier access)
   const mobileLinks = [
-    "Home", 
-    "About", 
-    "Staff Directory", 
-    "Library Policies", 
-    "Library Branches",
-    "Services", 
-    "E-Library", 
-    "OPAC", 
-    "News & Events", 
-    "Contact"
+    "Home", "About", "Staff Directory", "Library Policies", "Library Branches",
+    "Services", "E-Library", "OPAC", "News & Events", "Contact"
   ];
 
   return (
@@ -62,7 +74,8 @@ const Navbar = () => {
           <div className="flex items-center space-x-6">
             <span className="flex items-center gap-1.5 opacity-90">
               <Clock className="w-3.5 h-3.5 text-yellow-400" />
-              <span>Today's Hours: 8:00 AM - 10:00 PM</span>
+              {/* This now displays the actual day and its hours */}
+              <span>Today's Hours: {displayHours}</span>
             </span>
             <a href="https://www.du.edu.et/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 opacity-90 hover:text-yellow-400 transition-colors">
               <Globe className="w-3.5 h-3.5 text-blue-300" />
@@ -70,7 +83,7 @@ const Navbar = () => {
             </a>
           </div>
           <div className="flex items-center space-x-4">
-            <Link to="https://www.du.edu.et/" className="hover:text-yellow-400 transition-colors flex items-center gap-1">
+            <Link to="/" className="hover:text-yellow-400 transition-colors flex items-center gap-1">
               <User className="w-3.5 h-3.5" /> Main Website
             </Link>
             <span className="opacity-30">|</span>
@@ -101,22 +114,16 @@ const Navbar = () => {
             <div className="hidden lg:flex items-center gap-1">
               <NavigationMenu>
                 <NavigationMenuList className="gap-1">
-                  
                   <NavigationMenuItem>
                     <NavigationMenuLink asChild>
                       <Link to="/" className={`px-4 py-2 text-sm font-semibold rounded-full transition-all duration-200 ${location.pathname === "/" ? "bg-green-50 text-green-700" : "text-slate-600 hover:text-green-700 hover:bg-slate-50"}`}>Home</Link>
                     </NavigationMenuLink>
                   </NavigationMenuItem>
 
-                  {/* ABOUT DROPDOWN (Updated) */}
                   <NavigationMenuItem>
                     <NavigationMenuTrigger className="text-slate-600 font-semibold hover:text-green-700">About</NavigationMenuTrigger>
                     <NavigationMenuContent>
                       <ul className="grid w-[340px] gap-3 p-4 bg-white rounded-xl shadow-xl border border-slate-100">
-                        
-                      
-
-                        {/* 2. Staff Directory */}
                         <li>
                           <NavigationMenuLink asChild>
                             <Link to="/staff" className="flex items-center gap-3 select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-slate-50 hover:text-green-700">
@@ -128,8 +135,6 @@ const Navbar = () => {
                             </Link>
                           </NavigationMenuLink>
                         </li>
-
-                        {/* 3. Library Policies */}
                         <li>
                           <NavigationMenuLink asChild>
                             <Link to="/policies" className="flex items-center gap-3 select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-slate-50 hover:text-green-700">
@@ -141,9 +146,7 @@ const Navbar = () => {
                             </Link>
                           </NavigationMenuLink>
                         </li>
-
-                         {/* 4. Library Branches */}
-                         <li>
+                        <li>
                           <NavigationMenuLink asChild>
                             <Link to="/branches" className="flex items-center gap-3 select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-slate-50 hover:text-green-700">
                               <MapPin className="w-4 h-4 text-slate-500" />
@@ -158,7 +161,6 @@ const Navbar = () => {
                     </NavigationMenuContent>
                   </NavigationMenuItem>
 
-                  {/* Rest of the links */}
                   {navLinks.slice(1).map((link) => (
                     <NavigationMenuItem key={link.name}>
                       <NavigationMenuLink asChild>
@@ -168,15 +170,6 @@ const Navbar = () => {
                       </NavigationMenuLink>
                     </NavigationMenuItem>
                   ))}
-
-                  <NavigationMenuItem>
-                    <NavigationMenuLink asChild>
-                      <Link to="/catalog" className={`ml-2 px-4 py-2 text-sm font-semibold rounded-full transition-all duration-200 border ${location.pathname === "/catalog" ? "bg-blue-600 text-white border-blue-600 hover:bg-blue-700" : "bg-white text-blue-600 border-blue-200 hover:border-blue-600 hover:bg-blue-50"}`}>
-                        Catalog
-                      </Link>
-                    </NavigationMenuLink>
-                  </NavigationMenuItem>
-
                 </NavigationMenuList>
               </NavigationMenu>
 
@@ -187,7 +180,6 @@ const Navbar = () => {
               </Link>
             </div>
 
-            {/* MOBILE MENU TRIGGER */}
             <button className="lg:hidden p-2 text-slate-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               {mobileMenuOpen ? <X className="h-7 w-7" /> : <Menu className="h-7 w-7" />}
             </button>
@@ -201,9 +193,7 @@ const Navbar = () => {
               <Button className="w-full bg-green-700 text-white mb-4"><Search className="mr-2 h-4 w-4" /> Search Library Catalog</Button>
             </Link>
             
-            {/* Expanded Mobile List */}
             {mobileLinks.map((item) => {
-               // Determine path for each mobile item
                let path = "/";
                if(item === "Home") path = "/";
                else if(item === "Staff Directory") path = "/staff";
