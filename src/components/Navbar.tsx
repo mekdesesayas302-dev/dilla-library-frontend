@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, Search, Clock, User, Globe, ChevronDown, Users, FileText, MapPin } from "lucide-react";
+import { 
+  Menu, X, Search, Clock, User, Globe, 
+  ChevronDown, Users, FileText, MapPin 
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
-  NavigationMenuContent,\\\\\\\\
+  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
@@ -15,38 +18,63 @@ import logo from "@/assets/logo.png";
 const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [displayHours, setDisplayHours] = useState(""); // Dynamic hours state
+  const [libraryStatus, setLibraryStatus] = useState({ text: "Loading...", isOpen: false });
   const location = useLocation();
 
   useEffect(() => {
-    // Function to get current day and formatted hours
-    const updateHours = () => {
-      const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    // --- 1. DYNAMIC TIME LOGIC ---
+    const updateTimeLogic = () => {
       const now = new Date();
-      const dayName = days[now.getDay()];
+      const day = now.getDay(); // 0 (Sun) to 6 (Sat)
+      const hour = now.getHours();
       
-      // Example Logic: Mon-Fri (8-10), Sat (9-6), Sun (Closed or 1-5)
-      // Adjust these strings to match your library's actual schedule
-      let hours = "8:00 AM - 10:00 PM"; 
-      
-      if (dayName === "Saturday") {
-        hours = "9:00 AM - 6:00 PM";
-      } else if (dayName === "Sunday") {
-        hours = "1:00 PM - 5:00 PM";
+      const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+      const currentDayName = days[day];
+
+      let openTime, closeTime, hoursLabel;
+
+      // Dilla University Library Typical Schedule Logic
+      if (day === 0) { // Sunday
+        openTime = 13; // 1:00 PM
+        closeTime = 17; // 5:00 PM
+        hoursLabel = "1:00 PM - 5:00 PM";
+      } else if (day === 6) { // Saturday
+        openTime = 9;  // 9:00 AM
+        closeTime = 18; // 6:00 PM
+        hoursLabel = "9:00 AM - 6:00 PM";
+      } else { // Weekdays (Mon-Fri)
+        openTime = 8;  // 8:00 AM
+        closeTime = 22; // 10:00 PM
+        hoursLabel = "8:00 AM - 10:00 PM";
       }
 
-      setDisplayHours(`${dayName}: ${hours}`);
+      const isOpen = hour >= openTime && hour < closeTime;
+      
+      setLibraryStatus({
+        text: `${currentDayName}: ${hoursLabel}`,
+        isOpen: isOpen
+      });
     };
 
-    updateHours();
+    // Run immediately on mount
+    updateTimeLogic();
     
+    // Refresh every minute to keep the "Open/Closed" status accurate
+    const timeInterval = setInterval(updateTimeLogic, 60000);
+
+    // --- 2. SCROLL LISTENER ---
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
     };
     window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      clearInterval(timeInterval);
+    };
   }, []);
 
+  // Close mobile menu when navigating
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [location]);
@@ -72,21 +100,22 @@ const Navbar = () => {
       <div className="hidden md:flex justify-between items-center bg-green-900 text-white px-4 py-1.5 text-xs font-medium tracking-wide">
         <div className="container mx-auto flex justify-between">
           <div className="flex items-center space-x-6">
-            <span className="flex items-center gap-1.5 opacity-90">
+            <div className="flex items-center gap-2">
               <Clock className="w-3.5 h-3.5 text-yellow-400" />
-              {/* This now displays the actual day and its hours */}
-              <span>Today's Hours: {displayHours}</span>
-            </span>
+              <span className="flex items-center gap-1.5">
+                <span className={`inline-block w-2 h-2 rounded-full animate-pulse ${libraryStatus.isOpen ? 'bg-emerald-400' : 'bg-red-500'}`}></span>
+                <span className="font-bold uppercase tracking-tight">
+                  {libraryStatus.isOpen ? "Open Now" : "Closed"}
+                </span>
+                <span className="opacity-70 ml-1 border-l border-white/20 pl-2">{libraryStatus.text}</span>
+              </span>
+            </div>
             <a href="https://www.du.edu.et/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 opacity-90 hover:text-yellow-400 transition-colors">
               <Globe className="w-3.5 h-3.5 text-blue-300" />
               <span>Dilla University Main Site</span>
             </a>
           </div>
           <div className="flex items-center space-x-4">
-            <Link to="/" className="hover:text-yellow-400 transition-colors flex items-center gap-1">
-              <User className="w-3.5 h-3.5" /> Main Website
-            </Link>
-            <span className="opacity-30">|</span>
             <a href="https://portal.du.edu.et/" target="_blank" rel="noopener noreferrer" className="hover:text-yellow-400 transition-colors font-semibold">
               Student Portal
             </a>
@@ -114,6 +143,7 @@ const Navbar = () => {
             <div className="hidden lg:flex items-center gap-1">
               <NavigationMenu>
                 <NavigationMenuList className="gap-1">
+                  
                   <NavigationMenuItem>
                     <NavigationMenuLink asChild>
                       <Link to="/" className={`px-4 py-2 text-sm font-semibold rounded-full transition-all duration-200 ${location.pathname === "/" ? "bg-green-50 text-green-700" : "text-slate-600 hover:text-green-700 hover:bg-slate-50"}`}>Home</Link>
@@ -126,33 +156,33 @@ const Navbar = () => {
                       <ul className="grid w-[340px] gap-3 p-4 bg-white rounded-xl shadow-xl border border-slate-100">
                         <li>
                           <NavigationMenuLink asChild>
-                            <Link to="/staff" className="flex items-center gap-3 select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-slate-50 hover:text-green-700">
+                            <Link to="/staff" className="flex items-center gap-3 rounded-md p-3 transition-colors hover:bg-slate-50 hover:text-green-700">
                               <Users className="w-4 h-4 text-slate-500" />
                               <div>
                                 <div className="text-sm font-bold text-slate-800">Staff Directory</div>
-                                <p className="line-clamp-1 text-xs text-slate-500">Meet our librarians</p>
+                                <p className="text-xs text-slate-500">Meet our librarians</p>
                               </div>
                             </Link>
                           </NavigationMenuLink>
                         </li>
                         <li>
                           <NavigationMenuLink asChild>
-                            <Link to="/policies" className="flex items-center gap-3 select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-slate-50 hover:text-green-700">
+                            <Link to="/policies" className="flex items-center gap-3 rounded-md p-3 transition-colors hover:bg-slate-50 hover:text-green-700">
                               <FileText className="w-4 h-4 text-slate-500" />
                               <div>
                                 <div className="text-sm font-bold text-slate-800">Library Policies</div>
-                                <p className="line-clamp-1 text-xs text-slate-500">Rules & Regulations</p>
+                                <p className="text-xs text-slate-500">Rules & Regulations</p>
                               </div>
                             </Link>
                           </NavigationMenuLink>
                         </li>
                         <li>
                           <NavigationMenuLink asChild>
-                            <Link to="/branches" className="flex items-center gap-3 select-none rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-slate-50 hover:text-green-700">
+                            <Link to="/branches" className="flex items-center gap-3 rounded-md p-3 transition-colors hover:bg-slate-50 hover:text-green-700">
                               <MapPin className="w-4 h-4 text-slate-500" />
                               <div>
                                 <div className="text-sm font-bold text-slate-800">Library Branches</div>
-                                <p className="line-clamp-1 text-xs text-slate-500">Locations & Capacity</p>
+                                <p className="text-xs text-slate-500">Locations & Capacity</p>
                               </div>
                             </Link>
                           </NavigationMenuLink>
@@ -175,19 +205,20 @@ const Navbar = () => {
 
               <Link to="/catalog" className="ml-4">
                 <Button className="bg-green-700 hover:bg-green-800 text-white rounded-full shadow-lg shadow-green-900/20 px-6">
-                  <Search className="mr-2 h-4 w-4" /> Search Books
+                  <Search className="mr-2 h-4 w-4" /> Search Catalog
                 </Button>
               </Link>
             </div>
 
-            <button className="lg:hidden p-2 text-slate-600 hover:text-green-700 hover:bg-green-50 rounded-lg transition-colors" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+            {/* MOBILE MENU TRIGGER */}
+            <button className="lg:hidden p-2 text-slate-600" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
               {mobileMenuOpen ? <X className="h-7 w-7" /> : <Menu className="h-7 w-7" />}
             </button>
           </div>
         </div>
 
         {/* MOBILE MENU */}
-        <div className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${mobileMenuOpen ? "max-h-[700px] border-t border-slate-100 shadow-xl" : "max-h-0"} bg-white`}>
+        <div className={`lg:hidden overflow-hidden transition-all duration-300 ease-in-out ${mobileMenuOpen ? "max-h-[800px] border-t border-slate-100 shadow-xl" : "max-h-0"} bg-white`}>
           <div className="container mx-auto px-4 py-6 flex flex-col space-y-3">
             <Link to="/catalog" className="w-full">
               <Button className="w-full bg-green-700 text-white mb-4"><Search className="mr-2 h-4 w-4" /> Search Library Catalog</Button>
@@ -202,21 +233,12 @@ const Navbar = () => {
                else path = `/${item.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-')}`;
 
                return (
-                <Link 
-                  key={item} 
-                  to={path}
-                  className="flex items-center justify-between px-4 py-3 rounded-xl text-slate-700 font-medium hover:bg-slate-50 hover:text-green-700 hover:pl-6 transition-all border border-transparent hover:border-slate-100"
-                >
+                <Link key={item} to={path} className="flex items-center justify-between px-4 py-3 rounded-xl text-slate-700 font-medium hover:bg-slate-50 hover:text-green-700 transition-all">
                   {item}
                   <ChevronDown className="h-4 w-4 -rotate-90 opacity-30" />
                 </Link>
                )
             })}
-            
-            <div className="pt-4 mt-4 border-t border-slate-100 grid grid-cols-2 gap-4">
-              <a href="https://portal.du.edu.et/" target="_blank" rel="noopener noreferrer" className="text-center text-sm font-semibold text-blue-600 bg-blue-50 py-3 rounded-lg hover:bg-blue-100 transition-colors">Student Portal</a>
-              <a href="https://www.du.edu.et/" target="_blank" rel="noopener noreferrer" className="text-center text-sm font-semibold text-slate-600 bg-slate-100 py-3 rounded-lg hover:bg-slate-200 transition-colors">Main Website</a>
-            </div>
           </div>
         </div>
       </nav>
